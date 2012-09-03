@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Material>
+	<Property>
+		<Member name="Opacity" value="1.0" />
+		<Member name="Ambient" value="0.5" />
+		<Member name="AmbientColor" number_of_elements="3" type="Float" value="0.0 0.6 1.0" />
+		<Member name="Diffuse" value="0.25" />
+		<Member name="DiffuseColor" number_of_elements="3" type="Float" value="0.5 0.8 1.0" />
+		<Member name="Specular" value="0.0" />
+		<Member name="SpecularColor" number_of_elements="3" type="Float" value="1.0 1.0 1.0" />
+		<Member name="SpecularPower" value="2.0" />
+		<Member name="FrontfaceCulling" value="0" />
+		<Member name="BackfaceCulling" value="0" />
+	</Property>
+</Material>

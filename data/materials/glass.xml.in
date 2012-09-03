@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Material>
+	<Property>
+		<Member name="Opacity" value="0.99" />
+		<Member name="Ambient" value="0.0" />
+		<Member name="AmbientColor" number_of_elements="3" type="Float" value="0.8 0.95 1.0" />
+		<Member name="Diffuse" value="0.0" />
+		<Member name="DiffuseColor" number_of_elements="3" type="Float" value="0.0 1.0 0.2" />
+		<Member name="Specular" value="0.05" />
+		<Member name="SpecularColor" number_of_elements="3" type="Float" value="0.6 0.4 1.0" />
+		<Member name="SpecularPower" value="9.0" />
+		<Member name="FrontfaceCulling" value="0" />
+		<Member name="BackfaceCulling" value="0" />
+	</Property>
+	<Texture name="Environment" type="2D" location="@PACKAGE_DATADIR@/textures/sky.jpg" format="jpg" />
+	<Shader scope="Vertex" name="A" location="@PACKAGE_DATADIR@/shaders/glass.vert.glsl" language="GLSL" entry="main" args="-DVERTEX_PROGRAM">
+	</Shader>
+	<Shader scope="Fragment" name="A" location="@PACKAGE_DATADIR@/shaders/glass.frag.glsl" language="GLSL" entry="main" args="-DFRAGMENT_PROGRAM">
+		<Uniform name="Cubemap" type="int" number_of_elements="1" value="0" />
+	</Shader>
+</Material>

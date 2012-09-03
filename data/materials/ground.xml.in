@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Material>
+	<Property>
+		<Member name="Opacity" value="1.0" />
+		<Member name="Ambient" value="0.0" />
+		<Member name="AmbientColor" number_of_elements="3" type="Float" value="0.0 0.6 1.0" />
+		<Member name="Diffuse" value="1.0" />
+		<Member name="DiffuseColor" number_of_elements="3" type="Float" value="1.0 1.0 1.0" />
+		<Member name="Specular" value="0.0" />
+		<Member name="SpecularColor" number_of_elements="3" type="Float" value="1.0 1.0 1.0" />
+		<Member name="SpecularPower" value="3.0" />
+		<Member name="FrontfaceCulling" value="0" />
+		<Member name="BackfaceCulling" value="1" />
+	</Property>
+	<Texture name="plane" type="2D" location="@PACKAGE_DATADIR@/textures/ground.jpg" format="jpg" />
+</Material>

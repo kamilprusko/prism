@@ -1,0 +1,15 @@
+#! /usr/bin/env python
+# encoding: utf-8
+
+def build(bld):
+    files = bld.path.ant_glob('*.in')
+
+    for file in files:
+        filename = str(file)
+
+        bld (features = 'subst',
+             source = filename,
+             target = filename.rstrip('.in'),
+             dict   = bld.env)
+
+        bld.install_files('${PACKAGE_DATADIR}/materials', filename.rstrip('.in'))

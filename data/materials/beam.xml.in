@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Material>
+	<Property>
+		<Member name="Opacity" value="0.99" />
+		<Member name="FrontfaceCulling" value="0" />
+		<Member name="BackfaceCulling" value="0" />
+	</Property>
+	<Shader scope="Vertex" location="@PACKAGE_DATADIR@/shaders/beam.vert.glsl" language="GLSL" entry="main" args="-DVERTEX_PROGRAM" />
+	<Shader scope="Fragment" location="@PACKAGE_DATADIR@/shaders/beam.frag.glsl" language="GLSL" entry="main" args="-DFRAGMENT_PROGRAM" />
+</Material>

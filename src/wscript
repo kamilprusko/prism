@@ -1,0 +1,31 @@
+#! /usr/bin/env python
+# encoding: utf-8
+
+vtk_libs = (
+        'vtkCommon',
+        'vtkFiltering',
+        'vtkImaging',
+        'vtkGraphics',
+        'vtkGenericFiltering',
+        'vtkIO',
+        'vtkRendering',
+        'vtkVolumeRendering',
+        'vtkHybrid',
+        'vtkWidgets',
+        'vtkParallel',
+        'vtkInfovis',
+        'vtkTextAnalysis',
+        'vtkGeovis',
+        'vtkViews',
+        'vtkCharts')
+
+def build(bld):
+    bld.program(
+            features = 'cxx cxxprogram',
+            source = bld.path.ant_glob('*.cpp'),
+            target = 'prism',
+            uselib = vtk_libs,
+            cxxflags = ('-g', '-Wall', '-Wno-deprecated'),
+            linkflags = ('-g')
+            )
+    bld.install_files('${BINDIR}', 'prism', chmod=0755)
