@@ -24,8 +24,8 @@ to 'fill in the gaps', resulting in a much lower effective resolution.
 
 ### Requirements
 
-* VTK (Visualization ToolKit)
-* Waf 1.6.x installed system-wide
+* [VTK](http://vtk.org/) (Visualization ToolKit)
+* [Waf](http://code.google.com/p/waf/) 1.6.x installed system-wide
 
 
 ### Build or Install
