@@ -1,11 +1,10 @@
-# Prism
+Prism
+=====
 
-## About
-
-This is an interactive 3D visualization showing dispersion of light
-by a trichroic prism (consisting of three prisms and two polarizing
-filters). It's also a nice example how to use VTK with interactive
-widgets and shaders.
+This program is an interactive 3D visualization showing dispersion
+of light by a trichroic prism (consisting of three prisms and two
+polarizing filters). It's also a nice example how to use VTK with
+interactive widgets and shaders.
 
 Trichroic prisms are used in 3CCD cameras, which uses three separate
 image sensors, each one taking a separate measurement of the primary
@@ -23,18 +22,18 @@ The other two-thirds must be interpolated with a demosaicing algorithm
 to 'fill in the gaps', resulting in a much lower effective resolution.
 
 
-## Requirements
+### Requirements
 
 * VTK (Visualization ToolKit)
 * Waf 1.6.x installed system-wide
 
 
-## Build or Install
+### Build or Install
 
 	$ waf configure --prefix=./install
 	$ waf build install
 
-## Run
+### Run
 
     $ ./install/bin/prism
 
