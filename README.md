@@ -37,3 +37,12 @@ to 'fill in the gaps', resulting in a much lower effective resolution.
 
     $ ./install/bin/prism
 
+### Screenshots
+
+Click to view.
+
+[![](http://kamilprusko.org/files/prism/screenshot-1-thumbnail.png)](http://kamilprusko.org/files/prism/screenshot-1.png)
+[![](http://kamilprusko.org/files/prism/screenshot-2-thumbnail.png)](http://kamilprusko.org/files/prism/screenshot-2.png)
+[![](http://kamilprusko.org/files/prism/screenshot-3-thumbnail.png)](http://kamilprusko.org/files/prism/screenshot-3.png)
+[![](http://kamilprusko.org/files/prism/screenshot-4-thumbnail.png)](http://kamilprusko.org/files/prism/screenshot-4.png)
+
