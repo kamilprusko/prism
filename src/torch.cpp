@@ -38,8 +38,8 @@ void TorchMovedCallback::Execute (vtkObject *caller,
     vtkTransform  *transform = vtkTransform::New();
     vtkLineWidget *widget    = reinterpret_cast<vtkLineWidget*>(caller);
 
-    double *a = widget->GetPoint1();
-    double *b = widget->GetPoint2();
+    const double *a = widget->GetPoint1();
+    const double *b = widget->GetPoint2();
     double direction[3];
     double orgin[3];
     double color[4] = {1.0, 1.0, 1.0, 0.8};

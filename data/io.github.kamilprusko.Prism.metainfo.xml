@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>io.github.kamilprusko.Prism</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-2.0-or-later</project_license>
+  <name>Prism</name>
+  <summary>3D visualization of dispersion through a trichroic prism</summary>
+  <description>
+    <p>
+      Interactive 3D visualization showing dispersion of light by a trichroic prism
+      (three prisms and two polarizing filters), built with VTK, interactive widgets,
+      and shaders.
+    </p>
+  </description>
+  <launchable type="desktop-id">io.github.kamilprusko.Prism.desktop</launchable>
+  <url type="homepage">https://github.com/kamilprusko/prism</url>
+  <developer id="io.github.kamilprusko">
+    <name>Kamil Prusko</name>
+  </developer>
+  <content_rating type="oars-1.1"/>
+  <screenshots>
+    <screenshot type="default">
+      <caption>Main view</caption>
+      <image type="source">https://kamilprusko.org/files/prism/screenshot-1.png</image>
+    </screenshot>
+  </screenshots>
+  <releases>
+    <release version="0.2" date="2010-01-01"/>
+  </releases>
+</component>

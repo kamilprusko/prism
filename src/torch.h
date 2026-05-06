@@ -17,11 +17,13 @@
  * Boston, MA  02110-1301  USA
  */
 
-#include "vtkCommand.h"
-#include "vtkLineWidget.h"
-#include "vtkMath.h"
-#include "vtkTransform.h"
-#include "vtkTransformPolyDataFilter.h"
+#include <vtkCommand.h>
+#include <vtkLineWidget.h>
+#include <vtkMath.h>
+#include <vtkTransform.h>
+#include <vtkTransformPolyDataFilter.h>
+
+class RayTracer;
 
 class TorchMovedCallback : public vtkCommand
 {
@@ -32,7 +34,7 @@ private:
 public:
     void set_raytracer (RayTracer *raytracer);
     void set_torch_transform (vtkTransformPolyDataFilter *torch_transform);
-    virtual void Execute (vtkObject *caller, unsigned long, void*);
+    void Execute (vtkObject *caller, unsigned long, void*) override;
 
 private:
     void set_transform_direction (vtkTransform *transform, const double  direction[3]);

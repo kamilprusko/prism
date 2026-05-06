@@ -19,6 +19,11 @@
 
 #include "ray-tracer.h"
 
+#include <algorithm>
+
+#include <vtkCellArray.h>
+#include <vtkPolyData.h>
+
 #define MAX_DISTANCE  (1.0e15)
 #define MIN_RAY_LENGTH  (1.0e-6)
 
@@ -231,7 +236,11 @@ void RayTracer::cast (const double     orgin[3],
                       const vtkIdType  orginPointID,
                       const vtkIdType *orginPolyIDs)
 {
-    vtkPolyData  *input       = prism_mapper->GetInput();
+    vtkPolyData *input = vtkPolyData::SafeDownCast (prism_mapper->GetInput());
+    if (!input)
+    {
+        return;
+    }
     vtkPoints    *inputPoints = input->GetPoints();
     vtkCellArray *inputPolys  = input->GetPolys();
 
@@ -256,18 +265,20 @@ void RayTracer::cast (const double     orgin[3],
                         orgin[2] + length*direction[2]
                   };
 
-    bool is_inside;
+    bool is_inside = false;
 
     // Iterate Polygons
-    vtkIdType *pointIDs,
-               pointCount;
+    vtkIdType pointCount;
+    const vtkIdType *pointIDs;
 
-    double     p[input->GetMaxCellSize()][3],
-               distance, t, u, v;
+    const vtkIdType maxCellSize = input->GetMaxCellSize();
+    std::vector<std::array<double, 3>> p(static_cast<size_t>(maxCellSize > 0 ? maxCellSize : 16));
+
+    double distance, t, u, v;
 
     inputPolys->InitTraversal();
 
-    for (int polyID=0; inputPolys->GetNextCell(pointCount,pointIDs); polyID++)
+    for (int polyID=0; inputPolys->GetNextCell(pointCount, pointIDs); polyID++)
     {
         // Exclude orgin polys
         for (int i=0; i<8 && orginPolyIDs[i] >= 0; i++)
@@ -278,12 +289,16 @@ void RayTracer::cast (const double     orgin[3],
             NextPoly: continue;
 
         // Make local copy of poly points
+        if (pointCount > static_cast<vtkIdType>(p.size()))
+        {
+            p.resize(static_cast<size_t>(pointCount));
+        }
         for (int i=0; i<pointCount; i++)
-            inputPoints->GetPoint (pointIDs[i], p[i]);
+            inputPoints->GetPoint (pointIDs[i], p[static_cast<size_t>(i)].data());
 
         // Test for Plane Intersection
         // TODO: Support quads too
-        if (!_intersect_triangle (orgin, direction, p[0], p[1], p[2], &t, &u, &v))
+        if (!_intersect_triangle (orgin, direction, p[0].data(), p[1].data(), p[2].data(), &t, &u, &v))
             continue;
 
         // Ensure correct direction
@@ -359,8 +374,10 @@ void RayTracer::cast (const double     orgin[3],
     vtkIdType projectedPointID = orginPointID;
 
     double projected_color[4] = { color[0], color[1], color[2], color[3] };
-    double color_range[2] = {0.0, 1.0};
-    vtkMath::ClampValue (projected_color, color_range);
+    for (int c = 0; c < 4; ++c)
+    {
+        projected_color[c] = std::clamp (projected_color[c], 0.0, 1.0);
+    }
 
     unsigned char projected_color_uc[4] = {
                         (unsigned char)(255 * projected_color[0]),

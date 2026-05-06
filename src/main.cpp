@@ -17,29 +17,30 @@
  * Boston, MA  02110-1301  USA
  */
 
-#include "vtkActor.h"
-#include "vtkCamera.h"
-#include "vtkCommand.h"
-#include "vtkCylinderSource.h"
-#include "vtkDataSet.h"
-#include "vtkDataSetMapper.h"
-#include "vtkFollower.h"
-#include "vtkInteractorStyleTerrain.h"
-#include "vtkLight.h"
-#include "vtkLineWidget.h"
-#include "vtkOBJReader.h"
-#include "vtkPlaneSource.h"
-#include "vtkPolyData.h"
-#include "vtkPolyDataMapper.h"
-#include "vtkProperty.h"
-#include "vtkRenderer.h"
-#include "vtkRenderWindow.h"
-#include "vtkRenderWindowInteractor.h"
-#include "vtkTextActor.h"
-#include "vtkTransform.h"
-#include "vtkTransformPolyDataFilter.h"
-#include "vtkTubeFilter.h"
-#include "vtkVectorText.h"
+#include <vtkAutoInit.h>
+VTK_MODULE_INIT(vtkRenderingOpenGL2);
+VTK_MODULE_INIT(vtkInteractionStyle);
+
+#include <vtkActor.h>
+#include <vtkCamera.h>
+#include <vtkCommand.h>
+#include <vtkCylinderSource.h>
+#include <vtkFollower.h>
+#include <vtkInteractorStyleTerrain.h>
+#include <vtkLight.h>
+#include <vtkLineWidget.h>
+#include <vtkOBJReader.h>
+#include <vtkPlaneSource.h>
+#include <vtkPolyData.h>
+#include <vtkPolyDataMapper.h>
+#include <vtkProperty.h>
+#include <vtkRenderer.h>
+#include <vtkRenderWindow.h>
+#include <vtkRenderWindowInteractor.h>
+#include <vtkTransform.h>
+#include <vtkTransformPolyDataFilter.h>
+#include <vtkTubeFilter.h>
+#include <vtkVectorText.h>
 
 #include "main.h"
 #include "config.h"
@@ -108,7 +109,7 @@ vtkActor *renderer_add_beam (vtkRenderer *renderer,
     beam_data = vtkPolyData::New();
 
     tubes = vtkTubeFilter::New();
-    tubes->SetInput (beam_data);
+    tubes->SetInputData (beam_data);
     tubes->SetRadius (0.5);
     tubes->SetNumberOfSides (12);
 
@@ -138,7 +139,7 @@ vtkActor *renderer_add_torch (vtkRenderer        *renderer,
     torch_source->SetCenter (0.0, 0.0, 0.0);
     torch_source->SetRadius (3.0);
     torch_source->SetHeight (9.0);
-    torch_source->SetResolution (20.0);
+    torch_source->SetResolution (20);
 
     vtkTransform *transform = vtkTransform::New();
     transform->Identity();
@@ -256,7 +257,7 @@ void renderer_add_labels (vtkRenderer *renderer)
 void renderer_add_ground (vtkRenderer *renderer)
 {
     vtkPlaneSource   *plane_source;
-    vtkDataSetMapper *plane_mapper;
+    vtkPolyDataMapper *plane_mapper;
     vtkActor         *plane;
 
     // Create a textured plane
@@ -267,8 +268,8 @@ void renderer_add_ground (vtkRenderer *renderer)
     plane_source->SetPoint1 ( 300.0, -300.0, -0.05);
     plane_source->SetPoint2 (-300.0,  300.0, -0.05);
 
-    plane_mapper = vtkDataSetMapper::New();
-    plane_mapper->SetInput (plane_source->GetOutput());
+    plane_mapper = vtkPolyDataMapper::New();
+    plane_mapper->SetInputConnection (plane_source->GetOutputPort());
 
     plane = vtkActor::New();
     plane->SetMapper (plane_mapper);
@@ -283,8 +284,8 @@ void renderer_add_ground (vtkRenderer *renderer)
     plane_source->SetPoint1 ( 10000.0, -10000.0, -0.2);
     plane_source->SetPoint2 (-10000.0,  10000.0, -0.2);
 
-    plane_mapper = vtkDataSetMapper::New();
-    plane_mapper->SetInput (plane_source->GetOutput());
+    plane_mapper = vtkPolyDataMapper::New();
+    plane_mapper->SetInputConnection (plane_source->GetOutputPort());
 
     plane = vtkActor::New();
     plane->SetMapper (plane_mapper);

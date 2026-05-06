@@ -1,0 +1,7 @@
+.git/
+build/
+builddir/
+.flatpak-builder/
+_flatpak_build/
+*.swp
+.cursor/
