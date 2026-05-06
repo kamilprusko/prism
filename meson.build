@@ -1,15 +1,40 @@
 project(
   'prism',
   'cpp',
-  version: '0.2',
+  version: '0.3',
   meson_version: '>=1.3.0',
   default_options: ['cpp_std=c++17'],
 )
 
+if get_option('vtk_kits')
+  vtk_module_targets = [
+    'VTK::Common',
+    'VTK::Filters',
+    'VTK::IO',
+    'VTK::Interaction',
+    'VTK::Rendering',
+    'VTK::OpenGL',
+  ]
+else
+  vtk_module_targets = [
+    'VTK::CommonCore',
+    'VTK::FiltersGeneral',
+    'VTK::FiltersSources',
+    'VTK::IOGeometry',
+    'VTK::InteractionStyle',
+    'VTK::InteractionWidgets',
+    'VTK::RenderingAnnotation',
+    'VTK::RenderingCore',
+    'VTK::RenderingOpenGL2',
+    'VTK::RenderingUI',
+    'VTK::RenderingFreeType',
+  ]
+endif
+
 vtk_dep = dependency(
   'VTK',
   method: 'cmake',
-  modules: [
+  components: [
     'CommonCore',
     'FiltersGeneral',
     'FiltersSources',
@@ -22,6 +47,7 @@ vtk_dep = dependency(
     'RenderingUI',
     'RenderingFreeType',
   ],
+  modules: vtk_module_targets,
 )
 
 package_datadir = join_paths(get_option('prefix'), get_option('datadir'), 'prism')

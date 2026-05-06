@@ -394,7 +394,7 @@ void RayTracer::cast (const double     orgin[3],
         line->GetPointIds()->SetId (0, orginPointID);     // the second 0 is the index of the Origin in the vtkPoints
         line->GetPointIds()->SetId (1, projectedPointID); // the second 1 is the index of P0 in the vtkPoints
         this->lines->InsertNextCell (line);
-        this->colors->InsertNextTupleValue (projected_color_uc);
+        this->colors->InsertNextTypedTuple (projected_color_uc);
     }
 
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010  Kamil Prusko
+ * Copyright (c) 2010,2026  Kamil Prusko
  *
  * This software is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -44,6 +44,7 @@ VTK_MODULE_INIT(vtkInteractionStyle);
 
 #include "main.h"
 #include "config.h"
+#include "materials.h"
 
 
 vtkCamera *renderer_add_camera (vtkRenderer *renderer)
@@ -90,8 +91,7 @@ vtkActor *renderer_add_prism (vtkRenderer *renderer,
 
     prism = vtkActor::New();
     prism->SetMapper (prism_mapper);
-    prism->GetProperty()->LoadMaterial (PACKAGE_DATADIR "/materials/glass.xml");
-    prism->GetProperty()->ShadingOn();
+    prism_apply_material (prism);
 
     renderer->AddActor (prism);
     raytracer->set_prism_mapper (prism_mapper);
@@ -118,8 +118,7 @@ vtkActor *renderer_add_beam (vtkRenderer *renderer,
 
     beam = vtkActor::New();
     beam->SetMapper (beam_mapper);
-    beam->GetProperty()->LoadMaterial (PACKAGE_DATADIR "/materials/beam.xml");
-    beam->GetProperty()->ShadingOn();
+    beam_apply_material (beam);
     beam->GetProperty()->SetLineWidth (4.0);
 
     renderer->AddActor (beam);
@@ -156,7 +155,7 @@ vtkActor *renderer_add_torch (vtkRenderer        *renderer,
 
     torch = vtkActor::New();
     torch->SetMapper (torch_mapper);
-    torch->GetProperty()->LoadMaterial (PACKAGE_DATADIR "/materials/torch.xml");
+    torch_apply_actor_material (torch->GetProperty());
 
     renderer->AddActor (torch);
     callback->set_torch_transform (torch_transform);
@@ -171,9 +170,10 @@ vtkObject *renderer_add_torch_widget (vtkRenderer               *renderer,
 
     widget = vtkLineWidget::New();
     widget->SetInteractor (window_interactor);
-    widget->GetHandleProperty()->LoadMaterial (PACKAGE_DATADIR "/materials/torch.xml");
-    widget->GetLineProperty()->SetOpacity (0.01);
-    widget->GetSelectedLineProperty()->SetOpacity (0.01);
+    torch_apply_handle_material (widget->GetHandleProperty (),
+                                 widget->GetSelectedHandleProperty ());
+    torch_apply_line_material (widget->GetLineProperty (),
+                               widget->GetSelectedLineProperty ());
     widget->ClampToBoundsOn();
     widget->PlaceWidget (
                 -90.0, -22.0, // xmin, xmax
@@ -202,7 +202,7 @@ void renderer_add_labels (vtkRenderer *renderer)
 
     text_actor  = vtkFollower::New();
     text_actor->SetMapper (text_mapper);
-    text_actor->GetProperty()->LoadMaterial (PACKAGE_DATADIR "/materials/text.xml");
+    label_apply_material (text_actor->GetProperty ());
     text_actor->SetScale (1.5, 1.5, 1.5);
     text_actor->SetPosition (-90.0, 0.0, 10.0);
     text_actor->SetCamera (renderer->GetActiveCamera());
@@ -217,7 +217,7 @@ void renderer_add_labels (vtkRenderer *renderer)
 
     text_actor  = vtkFollower::New();
     text_actor->SetMapper (text_mapper);
-    text_actor->GetProperty()->LoadMaterial (PACKAGE_DATADIR "/materials/text.xml");
+    label_apply_material (text_actor->GetProperty ());
     text_actor->SetScale (1.5, 1.5, 1.5);
     text_actor->SetPosition (50.0, 5.0, 10.0);
     text_actor->SetCamera (renderer->GetActiveCamera());
@@ -232,7 +232,7 @@ void renderer_add_labels (vtkRenderer *renderer)
 
     text_actor  = vtkFollower::New();
     text_actor->SetMapper (text_mapper);
-    text_actor->GetProperty()->LoadMaterial (PACKAGE_DATADIR "/materials/text.xml");
+    label_apply_material (text_actor->GetProperty ());
     text_actor->SetScale (1.5, 1.5, 1.5);
     text_actor->SetPosition (-5.0, 45.0, 10.0);
     text_actor->SetCamera (renderer->GetActiveCamera());
@@ -247,7 +247,7 @@ void renderer_add_labels (vtkRenderer *renderer)
 
     text_actor  = vtkFollower::New();
     text_actor->SetMapper (text_mapper);
-    text_actor->GetProperty()->LoadMaterial (PACKAGE_DATADIR "/materials/text.xml");
+    label_apply_material (text_actor->GetProperty ());
     text_actor->SetScale (1.5, 1.5, 1.5);
     text_actor->SetPosition (-5.0, -40.0, 10.0);
     text_actor->SetCamera (renderer->GetActiveCamera());
@@ -273,7 +273,7 @@ void renderer_add_ground (vtkRenderer *renderer)
 
     plane = vtkActor::New();
     plane->SetMapper (plane_mapper);
-    plane->GetProperty()->LoadMaterial (PACKAGE_DATADIR "/materials/ground.xml");
+    ground_apply_material (plane);
     renderer->AddActor (plane);
 
     // Create a wide plane to cover the beam

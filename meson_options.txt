@@ -1,0 +1,6 @@
+option(
+  'vtk_kits',
+  type: 'boolean',
+  value: false,
+  description: 'VTK built with VTK_ENABLE_KITS=ON (use kit CMake targets). Enable for the Flatpak VTK build.',
+)

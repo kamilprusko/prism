@@ -5,34 +5,41 @@
   "sdk": "org.freedesktop.Sdk",
   "command": "prism",
   "finish-args": [
-    "--share=ipc",
+    "--device=dri",
     "--socket=fallback-x11",
     "--socket=wayland",
-    "--device=dri"
+    "--share=ipc"
   ],
   "modules": [
     {
       "name": "vtk",
       "buildsystem": "cmake-ninja",
+      "builddir": true,
       "config-opts": [
-        "-DCMAKE_BUILD_TYPE=RelWithDebInfo",
+        "-DCMAKE_BUILD_TYPE=Release",
         "-DBUILD_SHARED_LIBS=ON",
         "-DVTK_BUILD_TESTING=OFF",
         "-DVTK_BUILD_EXAMPLES=OFF",
-        "-DVTK_ENABLE_LOGGING=ON",
+        "-DVTK_ENABLE_LOGGING=OFF",
         "-DVTK_ENABLE_REMOTE_MODULES=OFF",
         "-DVTK_WRAP_PYTHON=OFF",
+        "-DVTK_WRAP_JAVA=OFF",
         "-DVTK_OPENGL_HAS_EGL=ON",
-        "-DVTK_USE_X=ON",
-        "-DCMAKE_DISABLE_FIND_PACKAGE_Qt6=ON",
-        "-DCMAKE_DISABLE_FIND_PACKAGE_Qt5=ON",
-        "-DCMAKE_DISABLE_FIND_PACKAGE_MPI=ON"
+        "-DVTK_USE_X=OFF",
+        "-DVTK_USE_WAYLAND_OPENGL=ON",
+        "-DVTK_DEFAULT_RENDER_WINDOW_OFFSCREEN=OFF",
+        "-DVTK_BUILD_ALL_MODULES=OFF",
+        "-DVTK_ENABLE_KITS=ON",
+        "-DVTK_GROUP_ENABLE_Rendering=WANT",
+        "-DVTK_GROUP_ENABLE_StandAlone=WANT",
+        "-DVTK_MODULE_ENABLE_VTK_ViewsContext2D=DONT_WANT",
+        "-DVTK_MODULE_ENABLE_VTK_TestingCore=DONT_WANT"
       ],
       "sources": [
         {
           "type": "archive",
-          "url": "https://www.vtk.org/files/release/9.4/vtk-9.4.2.tar.gz",
-          "sha256": "80c3fe2ae1062abf56456f52518bd670f9ec3917b7f85e152b347ac6b6faf880"
+          "url": "https://www.vtk.org/files/release/9.5/VTK-9.5.2.tar.gz",
+          "sha256": "cee64b98d270ff7302daf1ef13458dff5d5ac1ecb45d47723835f7f7d562c989"
         }
       ]
     },
@@ -40,7 +47,8 @@
       "name": "prism",
       "buildsystem": "meson",
       "config-opts": [
-        "--libdir=lib"
+        "--libdir=lib",
+        "-Dvtk_kits=true"
       ],
       "build-options": {
         "env": {

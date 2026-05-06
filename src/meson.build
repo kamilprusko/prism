@@ -5,6 +5,7 @@ configure_file(
 
 prism_sources = files(
   'main.cpp',
+  'materials.cpp',
   'ray-tracer.cpp',
   'torch.cpp',
 )
