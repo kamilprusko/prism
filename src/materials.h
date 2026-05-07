@@ -1,8 +1,6 @@
 /*
  * Copyright (c) 2010  Kamil Prusko
  * SPDX-License-Identifier: GPL-2.0-or-later
- *
- * Replaces legacy vtkProperty::LoadMaterial (XML) removed in modern VTK.
  */
 
 #ifndef PRISM_MATERIALS_H
@@ -18,5 +16,7 @@ void torch_apply_handle_material (vtkProperty *handle, vtkProperty *selected_han
 void torch_apply_line_material (vtkProperty *line, vtkProperty *selected_line);
 void label_apply_material (vtkProperty *prop);
 void ground_apply_material (vtkActor *actor);
+/** Textured and shadow ground planes: single-sided (invisible from below). */
+void ground_plane_one_sided (vtkProperty *prop);
 
 #endif

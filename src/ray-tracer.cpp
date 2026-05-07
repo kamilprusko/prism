@@ -354,11 +354,14 @@ void RayTracer::cast (const double     orgin[3],
         projected_color[c] = std::clamp (projected_color[c], 0.0, 1.0);
     }
 
+    /* Attenuation belongs in alpha so beams fade (blend toward background), not in RGB
+       (premultiply made weaker rays look black instead of pale/transparent). */
+    const double vis = projected_color[3];
     unsigned char projected_color_uc[4] = {
-        (unsigned char)(255 * projected_color[0]),
-        (unsigned char)(255 * projected_color[1]),
-        (unsigned char)(255 * projected_color[2]),
-        (unsigned char)(255 * projected_color[3])
+        (unsigned char)(255.0 * std::clamp (projected_color[0], 0.0, 1.0)),
+        (unsigned char)(255.0 * std::clamp (projected_color[1], 0.0, 1.0)),
+        (unsigned char)(255.0 * std::clamp (projected_color[2], 0.0, 1.0)),
+        (unsigned char)(255.0 * std::clamp (vis, 0.0, 1.0))
     };
 
     if (projected_distance > MIN_RAY_LENGTH)

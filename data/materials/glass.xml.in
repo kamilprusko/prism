@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Material manifest (reference). Runtime uses vtkProperty + vtkShaderProperty
+  in src/materials.cpp; glass_vtk.inl holds the injected GLSL for VTK 9+.
+-->
 <Material>
 	<Property>
 		<Member name="Opacity" value="0.99" />
@@ -13,9 +17,4 @@
 		<Member name="BackfaceCulling" value="0" />
 	</Property>
 	<Texture name="Environment" type="2D" location="@PACKAGE_DATADIR@/textures/sky.jpg" format="jpg" />
-	<Shader scope="Vertex" name="A" location="@PACKAGE_DATADIR@/shaders/glass.vert.glsl" language="GLSL" entry="main" args="-DVERTEX_PROGRAM">
-	</Shader>
-	<Shader scope="Fragment" name="A" location="@PACKAGE_DATADIR@/shaders/glass.frag.glsl" language="GLSL" entry="main" args="-DFRAGMENT_PROGRAM">
-		<Uniform name="Cubemap" type="int" number_of_elements="1" value="0" />
-	</Shader>
 </Material>

@@ -29,9 +29,11 @@ VTK_MODULE_INIT(vtkInteractionStyle);
 #include <vtkInteractorStyleTerrain.h>
 #include <vtkLight.h>
 #include <vtkLineWidget.h>
+#include <vtkMapper.h>
 #include <vtkOBJReader.h>
 #include <vtkPlaneSource.h>
 #include <vtkPolyData.h>
+#include <vtkOpenGLPolyDataMapper.h>
 #include <vtkPolyDataMapper.h>
 #include <vtkProperty.h>
 #include <vtkRenderer.h>
@@ -118,17 +120,24 @@ vtkActor *renderer_add_prism (vtkRenderer *renderer,
 {
     vtkActor          *prism;
     vtkOBJReader      *prism_source;
-    vtkPolyDataMapper *prism_mapper;
+    vtkOpenGLPolyDataMapper *prism_mapper;
 
     prism_source = vtkOBJReader::New();
     prism_source->SetFileName (PACKAGE_DATADIR "/objects/prism.obj");
 
-    prism_mapper = vtkPolyDataMapper::New();
-    prism_mapper->SetInputConnection (prism_source->GetOutputPort());
+    prism_mapper = vtkOpenGLPolyDataMapper::New();
+    prism_mapper->SetInputConnection (prism_source->GetOutputPort ());
+    /* Ray tracing runs from TorchMovedCallback::Execute before the first Render(); lazy VTK
+       pipelines would otherwise leave the mapper input empty on that first cast — no hits,
+       no beams until something (e.g. moving the torch) triggered another update. */
+    prism_mapper->Update ();
 
     prism = vtkActor::New();
     prism->SetMapper (prism_mapper);
     prism_apply_material (prism);
+    /* Custom shader sets alpha in gl_FragData; still force translucent pass so VTK does not
+       classify the prop as opaque in some views (which caused opaque vs transparent flicker). */
+    prism->ForceTranslucentOn ();
 
     renderer->AddActor (prism);
     raytracer->set_trace_surface_mapper (prism_mapper);
@@ -152,6 +161,11 @@ vtkActor *renderer_add_beam (vtkRenderer *renderer,
 
     beam_mapper = vtkPolyDataMapper::New();
     beam_mapper->SetInputConnection (tubes->GetOutputPort());
+    beam_mapper->SetColorModeToDirectScalars ();   // RGBA unsigned-char cell data → used as-is
+    beam_mapper->SetScalarModeToUseCellData ();    // one colour per line segment
+    /* Shift tube polygons slightly toward the viewer so they do not share the exact same depth
+       as nearby prism faces (reduces z-fighting when blending translucent beam + glass). */
+    beam_mapper->SetRelativeCoincidentTopologyPolygonOffsetParameters (-6.0, -6.0);
 
     beam = vtkActor::New();
     beam->SetMapper (beam_mapper);
@@ -306,7 +320,8 @@ void renderer_add_ground (vtkRenderer *renderer)
     plane_source->SetPoint2 (-300.0,  300.0, -0.05);
 
     plane_mapper = vtkPolyDataMapper::New();
-    plane_mapper->SetInputConnection (plane_source->GetOutputPort());
+    plane_mapper->SetInputConnection (plane_source->GetOutputPort ());
+    plane_mapper->Update ();
 
     plane = vtkActor::New();
     plane->SetMapper (plane_mapper);
@@ -322,7 +337,8 @@ void renderer_add_ground (vtkRenderer *renderer)
     plane_source->SetPoint2 (-10000.0,  10000.0, -0.2);
 
     plane_mapper = vtkPolyDataMapper::New();
-    plane_mapper->SetInputConnection (plane_source->GetOutputPort());
+    plane_mapper->SetInputConnection (plane_source->GetOutputPort ());
+    plane_mapper->Update ();
 
     plane = vtkActor::New();
     plane->SetMapper (plane_mapper);
@@ -330,6 +346,7 @@ void renderer_add_ground (vtkRenderer *renderer)
     plane->GetProperty()->SetAmbientColor (0.0, 0.0, 0.0);
     plane->GetProperty()->SetDiffuse (0.0);
     plane->GetProperty()->SetSpecular (0.0);
+    ground_plane_one_sided (plane->GetProperty ());
     renderer->AddActor (plane);
 }
 
@@ -345,11 +362,22 @@ int main()
 
     renderer = vtkRenderer::New();
     renderer->SetBackground (0.0, 0.0, 0.0);
+    /* Depth peeling sorts translucent props into fixed peel layers; RGBA beam tubes + RGBA prism
+       fighting for those layers caused beams to disappear or punch holes when the torch moved.
+       Classical alpha blending uses approximate back-to-front sorting — good enough here and
+       keeps beams visible through the glass. */
+    renderer->SetUseDepthPeeling (0);
+
+    /* Relative polygon offsets need this global mode; net offset stays 0 except where mappers
+       set their own relative values (beam tubes). */
+    vtkMapper::SetResolveCoincidentTopologyToPolygonOffset ();
+    vtkMapper::SetResolveCoincidentTopologyPolygonOffsetParameters (0.0, 0.0);
+    vtkMapper::SetResolveCoincidentTopologyLineOffsetParameters (0.0, 0.0);
 
     window = vtkRenderWindow::New();
-    window->SetSize (1000, 600);
+    window->SetSize (1280, 720);
     window->SetAlphaBitPlanes (1);
-    window->SetMultiSamples (4);
+    window->SetMultiSamples (0);   /* MSAA + layered transparency is driver‑sensitive; keep off */
     window->AddRenderer (renderer);
 
     window_interactor = vtkRenderWindowInteractor::New();
@@ -359,6 +387,8 @@ int main()
     window_interactor->SetInteractorStyle (window_interactor_style);
 
     raytracer = new RayTracer ();
+    raytracer->set_refract_color_callback (prism_apply_sensor_faces);
+    raytracer->set_reflect_color_callback (prism_apply_sensor_faces);
 
     torch_moved_callback = new TorchMovedCallback ();
     torch_moved_callback->set_raytracer (raytracer);
@@ -370,13 +400,14 @@ int main()
     renderer_add_ground (renderer);
     renderer_add_prism  (renderer, raytracer);
     renderer_add_beam   (renderer, raytracer);
-
-    raytracer->set_refract_color_callback (prism_apply_sensor_faces);
-    raytracer->set_reflect_color_callback (prism_apply_sensor_faces);
-
     renderer_add_torch  (renderer, torch_moved_callback);
 
     torch_widget = renderer_add_torch_widget (renderer, window_interactor, torch_moved_callback);
+
+    /* Match first interactive render: terrain style calls ResetCameraClippingRange on motion; do it
+       once here so the opening frame uses correct near/far (avoids a dark / clipped ground until
+       the camera moves). */
+    renderer->ResetCameraClippingRange ();
 
     // Run
     window_interactor->Initialize();

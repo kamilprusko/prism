@@ -75,10 +75,23 @@ void TorchMovedCallback::set_transform_direction (vtkTransform *transform,
     double direction_normalized[3] = { direction[0], direction[1], direction[2] };
     vtkMath::Normalize (direction_normalized);
 
-    double x[3]    = {1.0, 0.0, 0.0};
-    double axis[3] = {1.0, 0.0, 0.0};
-    double theta   = acos (vtkMath::Dot (x, direction_normalized));
+    double x[3] = {1.0, 0.0, 0.0};
+    const double c = vtkMath::Dot (x, direction_normalized);
 
+    /* Align local +X with `direction`.  acos/cross become ill-conditioned when `direction`
+       is parallel or anti-parallel to X (zero rotation axis). */
+    if (c > 1.0 - 1.0e-7)
+    {
+        return;
+    }
+    if (c < -1.0 + 1.0e-7)
+    {
+        transform->RotateWXYZ (180.0, 0.0, 0.0, 1.0);
+        return;
+    }
+
+    double axis[3];
     vtkMath::Cross (x, direction_normalized, axis);
+    const double theta = acos (c);
     transform->RotateWXYZ (theta * 180.0 / vtkMath::Pi(), axis[0], axis[1], axis[2]);
 }
