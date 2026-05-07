@@ -46,6 +46,43 @@ VTK_MODULE_INIT(vtkInteractionStyle);
 #include "config.h"
 #include "materials.h"
 
+namespace {
+
+/* Cell ids in data/objects/prism.obj — per-face channel splitters for this scene. */
+constexpr vtkIdType kBlueSensorFaceA = 138;
+constexpr vtkIdType kBlueSensorFaceB = 139;
+constexpr vtkIdType kRgSplitterFaceA = 26;
+constexpr vtkIdType kRgSplitterFaceB = 27;
+
+static void
+prism_apply_sensor_faces (RayHitColorContext &ctx)
+{
+    const vtkIdType p0 = ctx.primary_cell_id;
+    const vtkIdType *ids = ctx.related_cell_ids;
+
+    const bool blue_split_face =
+        (p0 == kBlueSensorFaceA || p0 == kBlueSensorFaceB);
+    const bool rg_split_face =
+        (p0 == kRgSplitterFaceA || p0 == kRgSplitterFaceB)
+        || (ctx.related_cell_ids_capacity >= 2
+            && (ids[1] == kRgSplitterFaceA || ids[1] == kRgSplitterFaceB));
+
+    if (blue_split_face)
+    {
+        ctx.refracted_rgba[2] = 0.0;
+        ctx.reflected_rgba[0] = ctx.reflected_rgba[1] = 0.0;
+        ctx.refracted_rgba[3] = ctx.reflected_rgba[3] = ctx.incoming_rgba[3];
+    }
+
+    if (rg_split_face)
+    {
+        ctx.refracted_rgba[0] = ctx.refracted_rgba[2] = 0.0;
+        ctx.reflected_rgba[1] = ctx.reflected_rgba[2] = 0.0;
+        ctx.refracted_rgba[3] = ctx.reflected_rgba[3] = ctx.incoming_rgba[3];
+    }
+}
+
+} // namespace
 
 vtkCamera *renderer_add_camera (vtkRenderer *renderer)
 {
@@ -94,7 +131,7 @@ vtkActor *renderer_add_prism (vtkRenderer *renderer,
     prism_apply_material (prism);
 
     renderer->AddActor (prism);
-    raytracer->set_prism_mapper (prism_mapper);
+    raytracer->set_trace_surface_mapper (prism_mapper);
     return prism;
 }
 
@@ -333,6 +370,10 @@ int main()
     renderer_add_ground (renderer);
     renderer_add_prism  (renderer, raytracer);
     renderer_add_beam   (renderer, raytracer);
+
+    raytracer->set_refract_color_callback (prism_apply_sensor_faces);
+    raytracer->set_reflect_color_callback (prism_apply_sensor_faces);
+
     renderer_add_torch  (renderer, torch_moved_callback);
 
     torch_widget = renderer_add_torch_widget (renderer, window_interactor, torch_moved_callback);
