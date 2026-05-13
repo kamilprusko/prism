@@ -24,18 +24,31 @@
 #include <vtkTransformPolyDataFilter.h>
 
 class RayTracer;
+class vtkRenderWindowInteractor;
 
 class TorchMovedCallback : public vtkCommand
 {
 private:
-    RayTracer                  *raytracer;
-    vtkTransformPolyDataFilter *torch_transform;
+    RayTracer                    *raytracer = nullptr;
+    vtkTransformPolyDataFilter   *torch_transform = nullptr;
+    vtkLineWidget                *line_widget = nullptr;
+    bool                          widget_dragging = false;
 
 public:
     void set_raytracer (RayTracer *raytracer);
     void set_torch_transform (vtkTransformPolyDataFilter *torch_transform);
+    /** Arm Start/EndInteraction observers for drag tracking (see TorchInteractorStyle). */
+    void attach_for_live_drag (vtkLineWidget *widget, vtkRenderWindowInteractor *iren);
     void Execute (vtkObject *caller, unsigned long, void*) override;
 
+    bool is_widget_dragging () const { return widget_dragging; }
+    /** Raytrace + torch pose from widget endpoints (call after vtkLineWidget handled MouseMove). */
+    void sync_torch_from_widget (vtkLineWidget *widget);
+
 private:
+    void sync_from_widget (vtkLineWidget *widget);
     void set_transform_direction (vtkTransform *transform, const double  direction[3]);
+
+    static void OnWidgetStart (vtkObject *, unsigned long, void *clientdata, void *);
+    static void OnWidgetEnd (vtkObject *, unsigned long, void *clientdata, void *);
 };

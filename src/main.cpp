@@ -22,13 +22,17 @@ VTK_MODULE_INIT(vtkRenderingOpenGL2);
 VTK_MODULE_INIT(vtkInteractionStyle);
 
 #include <vtkActor.h>
+#include <vtkAssemblyPath.h>
+#include <vtkCallbackCommand.h>
 #include <vtkCamera.h>
+#include <vtkCellPicker.h>
 #include <vtkCommand.h>
 #include <vtkCylinderSource.h>
 #include <vtkFollower.h>
 #include <vtkInteractorStyleTerrain.h>
 #include <vtkLight.h>
 #include <vtkLineWidget.h>
+#include <vtkObjectFactory.h>
 #include <vtkMapper.h>
 #include <vtkOBJReader.h>
 #include <vtkPlaneSource.h>
@@ -47,6 +51,153 @@ VTK_MODULE_INIT(vtkInteractionStyle);
 #include "main.h"
 #include "config.h"
 #include "materials.h"
+
+/**
+ * vtkLineWidget normally translates the whole line on left-click along the line body (MovingLine).
+ * We route left-drag orbit to the terrain style instead: only endpoint handles use left; line-body
+ * translation matches VTK's middle-button path (see OnMiddleButtonDown).
+ *
+ * Right mouse is not forwarded — VTK would scale line length; TorchInteractorStyleTerrain uses
+ * right-drag for camera dolly (zoom).
+ *
+ * vtkLineWidget::ProcessEvents is non-virtual and points at vtkLineWidget::ProcessEvents, so we
+ * replace the callback in this subclass ctor (same pattern VTK uses internally).
+ */
+class TorchLineWidget : public vtkLineWidget
+{
+public:
+  static TorchLineWidget *New ();
+  vtkTypeMacro (TorchLineWidget, vtkLineWidget);
+
+protected:
+  TorchLineWidget ();
+  ~TorchLineWidget () override = default;
+
+  static void ProcessEvents (vtkObject *, unsigned long event, void *clientdata, void *);
+
+private:
+  void OnLeftButtonIgnoreLineBody ();
+};
+
+vtkStandardNewMacro (TorchLineWidget);
+
+TorchLineWidget::TorchLineWidget ()
+{
+    this->EventCallbackCommand->SetCallback (TorchLineWidget::ProcessEvents);
+}
+
+void TorchLineWidget::ProcessEvents (vtkObject *, unsigned long event, void *clientdata,
+                                     void *)
+{
+    auto *self = static_cast<TorchLineWidget *> (clientdata);
+
+    switch (event)
+    {
+    case vtkCommand::LeftButtonPressEvent:
+        self->OnLeftButtonIgnoreLineBody ();
+        break;
+    case vtkCommand::LeftButtonReleaseEvent:
+        self->vtkLineWidget::OnLeftButtonUp ();
+        break;
+    case vtkCommand::MiddleButtonPressEvent:
+        self->vtkLineWidget::OnMiddleButtonDown ();
+        break;
+    case vtkCommand::MiddleButtonReleaseEvent:
+        self->vtkLineWidget::OnMiddleButtonUp ();
+        break;
+    case vtkCommand::RightButtonPressEvent:
+    case vtkCommand::RightButtonReleaseEvent:
+        /* Leave right-click to vtkInteractorStyleTerrain (dolly); skip vtkLineWidget scaling. */
+        break;
+    case vtkCommand::MouseMoveEvent:
+        self->vtkLineWidget::OnMouseMove ();
+        break;
+    default:
+        break;
+    }
+}
+
+void TorchLineWidget::OnLeftButtonIgnoreLineBody ()
+{
+    int X = this->Interactor->GetEventPosition ()[0];
+    int Y = this->Interactor->GetEventPosition ()[1];
+
+    if (!this->CurrentRenderer || !this->CurrentRenderer->IsInViewport (X, Y))
+    {
+        this->State = vtkLineWidget::Outside;
+        return;
+    }
+
+    vtkAssemblyPath *path = this->GetAssemblyPath (X, Y, 0., this->HandlePicker);
+
+    if (path != nullptr)
+    {
+        this->vtkLineWidget::OnLeftButtonDown ();
+        return;
+    }
+
+    path = this->GetAssemblyPath (X, Y, 0., this->LinePicker);
+    if (path != nullptr)
+    {
+        /* Left on shaft only — defer translation to middle mouse (Superclass::OnMiddleButton*). */
+        this->State = vtkLineWidget::Outside;
+        return;
+    }
+
+    this->State = vtkLineWidget::Outside;
+    this->HighlightHandle (nullptr);
+}
+
+/**
+ * Terrain camera uses priority below the torch line widget so handles win left-click before orbit.
+ * Middle-button camera pan is disabled so vtkLineWidget keeps MiddleButton* for line translation.
+ * Left button down clears stale vtkInteractorStyle State so StartRotate() is not skipped.
+ * After superclass MouseMove (runs after the widget because style priority is lower), refresh
+ * torch + beams while widget_dragging — vtkLineWidget sets AbortFlag on MouseMove which can
+ * block separate vtkRenderWindowInteractor observers for the same event.
+ */
+class TorchInteractorStyle : public vtkInteractorStyleTerrain
+{
+public:
+  static TorchInteractorStyle *New ();
+  vtkTypeMacro (TorchInteractorStyle, vtkInteractorStyleTerrain);
+
+  void SetTorchCallback (TorchMovedCallback *cb) { this->torch_cb = cb; }
+  void SetLineWidget (vtkLineWidget *w) { this->line_w = w; }
+
+protected:
+  TorchInteractorStyle () = default;
+  ~TorchInteractorStyle () override = default;
+
+  void OnLeftButtonDown () override;
+  void OnMiddleButtonDown () override {}
+  void OnMiddleButtonUp () override {}
+  void OnMouseMove () override;
+
+private:
+  TorchMovedCallback *torch_cb = nullptr;
+  vtkLineWidget     *line_w = nullptr;
+};
+
+vtkStandardNewMacro (TorchInteractorStyle);
+
+void TorchInteractorStyle::OnLeftButtonDown ()
+{
+    if (this->State != VTKIS_NONE)
+    {
+        this->StopState ();
+    }
+    this->vtkInteractorStyleTerrain::OnLeftButtonDown ();
+}
+
+void TorchInteractorStyle::OnMouseMove ()
+{
+    this->vtkInteractorStyleTerrain::OnMouseMove ();
+    if (this->torch_cb && this->line_w && this->torch_cb->is_widget_dragging ())
+    {
+        this->torch_cb->sync_torch_from_widget (this->line_w);
+    }
+}
 
 namespace {
 
@@ -219,7 +370,10 @@ vtkObject *renderer_add_torch_widget (vtkRenderer               *renderer,
 {
     vtkLineWidget *widget;
 
-    widget = vtkLineWidget::New();
+    widget = TorchLineWidget::New ();
+    /* Above TorchInteractorStyle (0.55): handle picks abort before orbit; line-shaft left passes
+       through (TorchLineWidget) so middle still translates the torch line. */
+    widget->SetPriority (0.65f);
     widget->SetInteractor (window_interactor);
     torch_apply_handle_material (widget->GetHandleProperty (),
                                  widget->GetSelectedHandleProperty ());
@@ -234,6 +388,7 @@ vtkObject *renderer_add_torch_widget (vtkRenderer               *renderer,
     widget->SetPoint1 (-80.0, 0.0, 22.0);
     widget->SetPoint2 (-30.0, 0.0, 20.0);
     widget->AddObserver (vtkCommand::InteractionEvent, callback);
+    callback->attach_for_live_drag (widget, window_interactor);
     widget->On();
     return (vtkObject*) widget;
 }
@@ -355,7 +510,7 @@ int main()
     vtkRenderer               *renderer;
     vtkRenderWindow           *window;
     vtkRenderWindowInteractor *window_interactor;
-    vtkInteractorStyleTerrain *window_interactor_style;
+    TorchInteractorStyle      *window_interactor_style;
     RayTracer                 *raytracer;
     TorchMovedCallback        *torch_moved_callback;
     vtkObject                 *torch_widget;
@@ -383,7 +538,8 @@ int main()
     window_interactor = vtkRenderWindowInteractor::New();
     window_interactor->SetRenderWindow (window);
 
-    window_interactor_style = vtkInteractorStyleTerrain::New();
+    window_interactor_style = TorchInteractorStyle::New ();
+    window_interactor_style->SetPriority (0.55f);
     window_interactor->SetInteractorStyle (window_interactor_style);
 
     raytracer = new RayTracer ();
@@ -403,6 +559,9 @@ int main()
     renderer_add_torch  (renderer, torch_moved_callback);
 
     torch_widget = renderer_add_torch_widget (renderer, window_interactor, torch_moved_callback);
+    window_interactor_style->SetTorchCallback (torch_moved_callback);
+    window_interactor_style->SetLineWidget (
+        vtkLineWidget::SafeDownCast (torch_widget));
 
     /* Match first interactive render: terrain style calls ResetCameraClippingRange on motion; do it
        once here so the opening frame uses correct near/far (avoids a dark / clipped ground until
