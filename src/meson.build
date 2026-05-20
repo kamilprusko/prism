@@ -5,9 +5,14 @@ configure_file(
 
 prism_sources = files(
   'main.cpp',
+  'utils.cpp',
   'materials.cpp',
-  'ray-tracer.cpp',
-  'torch.cpp',
+  'rayTracer.cpp',
+  'prismActor.cpp',
+  'beamActor.cpp',
+  'torchMovedCallback.cpp',
+  'scene.cpp',
+  'torchWidget.cpp',
 )
 
 executable(

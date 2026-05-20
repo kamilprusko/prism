@@ -1,20 +1,3 @@
-materials = [
-  'beam',
-  'glass',
-  'ground',
-  'text',
-  'torch',
-]
-foreach m : materials
-  configure_file(
-    input: 'materials' / (m + '.xml.in'),
-    output: m + '.xml',
-    configuration: conf_xml,
-    install: true,
-    install_dir: join_paths(package_datadir, 'materials'),
-  )
-endforeach
-
 install_subdir(
   'shaders',
   install_dir: join_paths(package_datadir, 'shaders'),

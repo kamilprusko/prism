@@ -27,6 +27,11 @@ world of Cinema (ARRI, RED, Sony Venice), the industry has moved away
 from prisms and toward Single-Chip Large Format sensors. 
 
 
+### Coding style
+
+Naming and formatting rules for C++ in `src/` are described in [docs/coding-style.md](docs/coding-style.md). Use the repo `.clang-format` before committing.
+
+
 ### Requirements
 
 * [VTK](https://vtk.org/) 9.x (Visualization Toolkit), discoverable by CMake (for example `vtk-devel` on Fedora, or the VTK module built by the Flatpak manifest below)

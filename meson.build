@@ -56,9 +56,5 @@ conf_h = configuration_data()
 conf_h.set_quoted('PACKAGE_NAME', meson.project_name())
 conf_h.set_quoted('PACKAGE_DATADIR', package_datadir)
 
-conf_xml = configuration_data()
-conf_xml.set('PACKAGE_DATADIR', package_datadir)
-
-
 subdir('src')
 subdir('data')
