@@ -1,9 +1,8 @@
-Prism
-=====
+# Trichroic Prism Visualization
 
 This program is an interactive 3D visualization showing dispersion
 of light by a trichroic prism (consisting of three prisms and two
-polarizing filters). It's also a nice example how to use VTK with
+polarizing filters). It's also a good example how to use VTK with
 interactive widgets and shaders.
 
 Trichroic prisms are used in 3-CMOS/3CCD cameras, which use three separate
@@ -27,18 +26,22 @@ world of Cinema (ARRI, RED, Sony Venice), the industry has moved away
 from prisms and toward Single-Chip Large Format sensors. 
 
 
-### Coding style
+## Screenshots
 
-Naming and formatting rules for C++ in `src/` are described in [docs/coding-style.md](docs/coding-style.md). Use the repo `.clang-format` before committing.
+![](screenshots/1.png)
+<br/>
 
+![](screenshots/2.png)
+<br/>
 
-### Requirements
+## Build and run
+
+### From source code
+
+**Requirements:**
 
 * [VTK](https://vtk.org/) 9.x (Visualization Toolkit), discoverable by CMake (for example `vtk-devel` on Fedora, or the VTK module built by the Flatpak manifest below)
 * [Meson](https://mesonbuild.com/) 1.3 or newer and Ninja
-
-
-### Build and run
 
 Install VTK development files so that CMake can find `VTKConfig.cmake`, then:
 
@@ -55,12 +58,11 @@ If CMake does not find VTK, point Meson at the install prefix, for example:
 meson setup build --cmake-prefix-path=/path/to/vtk/prefix
 ```
 
+### With Flatpak
 
-### Build and run with Flatpak
+You may build it inside a Flatpak container. Keep in mind that it'll require compiling VTK, which may take a lot of time.
 
-You may build it inside a flatpak container. Keep in mind that it'll require compiling VTK as well, which may take a lot of time.
-
-Install `flatpak` and `flatpak-builder`, install the Freedesktop 24.08 SDK and runtime if needed, then from the repository root:
+Install `flatpak` and `flatpak-builder`, install the Freedesktop 24.08 SDK and runtime if needed, then run from the repository root:
 
 ```sh
 flatpak-builder --user --install --force-clean _flatpak_build io.github.kamilprusko.Prism.json
@@ -69,13 +71,3 @@ flatpak run io.github.kamilprusko.Prism
 
 The first build compiles VTK 9.4 and the application; later builds are incremental. Use `flatpak-builder --build-shell _flatpak_build io.github.kamilprusko.Prism.json` for an interactive shell inside the build environment.
 
-Optional: add `build/` and `_flatpak_build/` to `.gitignore` (already covered in this repository) and use [`.flatpakignore`](.flatpakignore) so large local directories are not copied into the Flatpak build.
-
-### Screenshots
-
-Click to view.
-
-[![](http://kamilprusko.org/files/prism/screenshot-1-thumbnail.png)](http://kamilprusko.org/files/prism/screenshot-1.png)
-[![](http://kamilprusko.org/files/prism/screenshot-2-thumbnail.png)](http://kamilprusko.org/files/prism/screenshot-2.png)
-[![](http://kamilprusko.org/files/prism/screenshot-3-thumbnail.png)](http://kamilprusko.org/files/prism/screenshot-3.png)
-[![](http://kamilprusko.org/files/prism/screenshot-4-thumbnail.png)](http://kamilprusko.org/files/prism/screenshot-4.png)

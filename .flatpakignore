@@ -6,5 +6,5 @@ _flatpak_build/
 _fb_build/
 _fb_prism/
 _repo_prism/
-*.swp
 .cursor/
+*.swp
