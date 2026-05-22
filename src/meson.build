@@ -10,6 +10,7 @@ prism_sources = files(
   'rayTracer.cpp',
   'prismActor.cpp',
   'beamActor.cpp',
+  'labelActor.cpp',
   'torchMovedCallback.cpp',
   'scene.cpp',
   'torchWidget.cpp',

@@ -8,8 +8,8 @@
 #include <vtkCamera.h>
 #include <vtkCommand.h>
 #include <vtkCylinderSource.h>
-#include <vtkFollower.h>
 #include <vtkLight.h>
+#include <vtkTextProperty.h>
 #include <vtkNew.h>
 #include <vtkPlaneSource.h>
 #include <vtkPolyDataMapper.h>
@@ -19,9 +19,9 @@
 #include <vtkRenderWindowInteractor.h>
 #include <vtkTransform.h>
 #include <vtkTransformPolyDataFilter.h>
-#include <vtkVectorText.h>
 
 #include "beamActor.h"
+#include "labelActor.h"
 #include "materials.h"
 #include "prismActor.h"
 #include "rayTracer.h"
@@ -56,19 +56,21 @@ void addLights(vtkRenderer *renderer)
 
 void addLabel(vtkRenderer *renderer, const char *text, double x, double y, double z)
 {
-    vtkNew<vtkVectorText> vectorText;
-    vectorText->SetText(text);
+    vtkNew<LabelActor> label;
+    label->SetInput(text);
+    label->SetPosition(x, y, z);
 
-    vtkNew<vtkPolyDataMapper> textMapper;
-    textMapper->SetInputConnection(vectorText->GetOutputPort());
+    vtkTextProperty *textProp = label->GetTextProperty();
+    textProp->SetFontFamily(VTK_FONT_FILE);
+    // textProp->SetFontFile("/home/kamil/.fonts/Noto Sans/static/NotoSans-SemiBold.ttf");
+    textProp->SetColor(1.0, 1.0, 1.0);
+    textProp->SetOpacity(1.0);
+    textProp->SetFontSize(16);
+    textProp->SetBold(false);
+    textProp->SetShadow(false);
+    textProp->SetJustificationToCentered();
 
-    vtkNew<vtkFollower> textActor;
-    textActor->SetMapper(textMapper);
-    ApplyLabelMaterial(textActor->GetProperty());
-    textActor->SetScale(1.5, 1.5, 1.5);
-    textActor->SetPosition(x, y, z);
-    textActor->SetCamera(renderer->GetActiveCamera());
-    renderer->AddActor(textActor);
+    renderer->AddActor(label);
 }
 
 void addLabels(vtkRenderer *renderer)

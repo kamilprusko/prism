@@ -14,7 +14,6 @@ void ApplyBeamMaterial(vtkActor *actor);
 void ApplyTorchMaterial(vtkProperty *prop);
 void ApplyTorchHandleMaterial(vtkProperty *handle, vtkProperty *selectedHandle);
 void ApplyTorchLineMaterial(vtkProperty *line, vtkProperty *selectedLine);
-void ApplyLabelMaterial(vtkProperty *prop);
 void ApplyGroundMaterial(vtkActor *actor);
 void ApplyOneSidedMaterial(vtkProperty *prop);
 

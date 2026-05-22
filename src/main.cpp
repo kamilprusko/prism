@@ -23,7 +23,7 @@ int main()
     vtkNew<vtkRenderWindow> window;
     window->SetSize(1280, 720);
     window->AlphaBitPlanesOn();
-    window->SetMultiSamples(0); // sample count, not a boolean flag
+    window->SetMultiSamples(0);
     window->AddRenderer(renderer);
 
     PrismScene scene;

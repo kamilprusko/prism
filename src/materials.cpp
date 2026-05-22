@@ -128,20 +128,6 @@ void ApplyTorchLineMaterial(vtkProperty *line, vtkProperty *selectedLine)
     // Use VTK default style for lines
 }
 
-void ApplyLabelMaterial(vtkProperty *prop)
-{
-    prop->SetOpacity(1.0);
-    prop->SetAmbient(1.0);
-    prop->SetAmbientColor(1.0, 1.0, 1.0);
-    prop->SetDiffuse(0.0);
-    prop->SetDiffuseColor(0.5, 0.8, 1.0);
-    prop->SetSpecular(0.0);
-    prop->SetSpecularColor(1.0, 1.0, 1.0);
-    prop->SetSpecularPower(2.0);
-
-    applyPhongLighting(prop);
-}
-
 void ApplyGroundMaterial(vtkActor *actor)
 {
     vtkProperty *prop = actor->GetProperty();
