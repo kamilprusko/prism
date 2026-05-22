@@ -28,10 +28,14 @@ from prisms and toward Single-Chip Large Format sensors.
 
 ## Screenshots
 
-![](screenshots/1.png)
+<a href="https://raw.githubusercontent.com/kamilprusko/prism/master/screenshots/1.png" target="_blank">
+  <img src="screenshots/1.png" alt="Prism Screenshot"/>
+</a>
 <br/>
 
-![](screenshots/2.png)
+<a href="https://raw.githubusercontent.com/kamilprusko/prism/master/screenshots/2.png" target="_blank">
+  <img src="screenshots/2.png" alt="Prism Screenshot"/>
+</a>
 <br/>
 
 ## Build and run
