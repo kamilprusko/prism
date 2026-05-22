@@ -1,29 +1,13 @@
 # Trichroic Prism Visualization
 
-This program is an interactive 3D visualization showing dispersion
-of light by a trichroic prism (consisting of three prisms and two
-polarizing filters). It's also a good example how to use VTK with
-interactive widgets and shaders.
+In a [3-CCD camera](https://en.wikipedia.org/wiki/Three-CCD_camera), white light from the lens hits a trichroic prism assembly
+that splits it into red, green, and blue—each path goes to its own sensor.
+No Bayer filter, no guessing missing colors: sharper detail and cleaner color
+on fine patterns (think stadium turf or striped fabric).
 
-Trichroic prisms are used in 3-CMOS/3CCD cameras, which use three separate
-image sensors, each one taking a separate measurement of the primary
-colors: red, green, or blue light. Light coming into the lens is split
-by a trichroic prism assembly, which directs the appropriate wavelength
-ranges of light to their respective sensors. The system is employed by
-still cameras, telecine systems, professional video cameras and some
-prosumer video cameras.
-
-A 3-chip system avoids the "Bayer filter" used on single chips, meaning
-there is no interpolation (guessing) of color. This results in superior
-color accuracy, better resolution and lower noise. It eliminates "moiré"
-artifacts, which is critical for filming things like stadium turf or
-finely patterned clothing.
-
-It's still in use in broadcasting, where it's easier to pair large zoom
-lens with smaller sensors. High-end commercial cinema projectors almost
-exclusively use 3-chip DLP (Digital Light Processing) technology. In the
-world of Cinema (ARRI, RED, Sony Venice), the industry has moved away
-from prisms and toward Single-Chip Large Format sensors. 
+This program lets you explore that stack in 3D: three prisms, two polarizing
+filters, and visible dispersion. It is also a compact example of [VTK](https://vtk.org/) with
+interactive widgets and custom shaders.
 
 
 ## Screenshots
@@ -40,14 +24,10 @@ from prisms and toward Single-Chip Large Format sensors.
 
 ## Build and run
 
-### From source code
+### From source
 
-**Requirements:**
-
-* [VTK](https://vtk.org/) 9.x (Visualization Toolkit), discoverable by CMake (for example `vtk-devel` on Fedora, or the VTK module built by the Flatpak manifest below)
-* [Meson](https://mesonbuild.com/) 1.3 or newer and Ninja
-
-Install VTK development files so that CMake can find `VTKConfig.cmake`, then:
+**Requirements:** [VTK](https://vtk.org/) 9.x, [Meson](https://mesonbuild.com/) ≥ 1.3, and Ninja.
+Install VTK development files so CMake finds `VTKConfig.cmake` (e.g. `vtk-devel` on Fedora).
 
 ```sh
 meson setup --reconfigure build --prefix=$PWD/.install
@@ -56,22 +36,18 @@ meson install -C build
 .install/bin/prism
 ```
 
-If CMake does not find VTK, point Meson at the install prefix, for example:
+If VTK is not on the default search path:
 
 ```sh
 meson setup build --cmake-prefix-path=/path/to/vtk/prefix
 ```
 
-### With Flatpak
+### Flatpak
 
-You may build it inside a Flatpak container. Keep in mind that it'll require compiling VTK, which may take a lot of time.
-
-Install `flatpak` and `flatpak-builder`, install the Freedesktop 24.08 SDK and runtime if needed, then run from the repository root:
+Requires `flatpak`, `flatpak-builder`, and the Freedesktop 24.08 SDK/runtime.
+The first build compiles VTK and can take a while.
 
 ```sh
 flatpak-builder --user --install --force-clean _flatpak_build io.github.kamilprusko.Prism.json
 flatpak run io.github.kamilprusko.Prism
 ```
-
-The first build compiles VTK 9.4 and the application; later builds are incremental. Use `flatpak-builder --build-shell _flatpak_build io.github.kamilprusko.Prism.json` for an interactive shell inside the build environment.
-
